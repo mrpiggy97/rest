@@ -8,6 +8,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/mrpiggy97/rest/database"
+	"github.com/mrpiggy97/rest/repository"
 )
 
 type Config struct {
@@ -29,9 +31,14 @@ func (broker *Broker) Config() *Config {
 	return broker.config
 }
 
-func (broker *Broker) Start(binder func(server IServer, router *mux.Router)) {
+func (broker *Broker) Start(binder func(appServer IServer, router *mux.Router)) {
 	broker.router = mux.NewRouter()
 	binder(broker, broker.router)
+	repo, repoErr := database.NewPostgresqlRespository(broker.config.DatabaseUrl)
+	if repoErr != nil {
+		log.Fatal(repoErr.Error())
+	}
+	repository.SetRepository(repo)
 	fmt.Println("starting server at port ", broker.config.Port)
 	if err := http.ListenAndServe(broker.config.Port, broker.router); err != nil {
 		log.Fatal(err.Error())
