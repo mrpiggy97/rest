@@ -77,47 +77,63 @@ func LoginHandler(appServer server.IServer) http.HandlerFunc {
 	return func(writer http.ResponseWriter, req *http.Request) {
 		// decode request
 		var request *SignUpLoginRequest = new(SignUpLoginRequest)
-		decodingErr := json.NewDecoder(req.Body).Decode(request)
-		if decodingErr != nil {
-			fmt.Println(decodingErr.Error())
-			responseError := "error decoding request"
-			http.Error(writer, errors.New(responseError).Error(), http.StatusBadRequest)
-			return
-		}
-		//make query to database
-		user, err := repository.GetUserByEmail(context.Background(), request.Email)
+		var user *models.User = new(models.User)
+		var tokenString string = ""
+		var status int
+
+		// decode request
+		err := json.NewDecoder(req.Body).Decode(request)
 		if err != nil {
 			fmt.Println(err.Error())
-			responseError := "there was an error retrieving user with that email"
-			http.Error(writer, errors.New(responseError).Error(), http.StatusInternalServerError)
-			return
+			err = errors.New("error decoding request")
+			status = http.StatusBadRequest
 		}
-		// decrypt password
-		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
-		if err != nil {
-			http.Error(writer, errors.New("error with password").Error(), http.StatusUnauthorized)
-			return
+		// get user from database
+		if err == nil {
+			user, err = repository.GetUserByEmail(context.Background(), request.Email)
+			if err != nil {
+				fmt.Println(err.Error())
+				err = errors.New("failed to retrieve user with that password and email")
+			}
+			status = http.StatusInternalServerError
 		}
-		// create jwt token and sign it
-		var claims models.AppClaims = models.AppClaims{
-			UserId: user.Id,
-			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: time.Now().Add(2 * time.Hour * 24).Unix(),
-			},
+		// autheticate user by checking that password sent by
+		// client is password stored at db
+		if err == nil {
+			err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+			if err != nil {
+				fmt.Println(err.Error())
+				err = errors.New("error with password")
+				status = http.StatusBadRequest
+			}
 		}
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenString, err := token.SignedString([]byte(appServer.Config().JWTSecret))
-		if err != nil {
-			fmt.Println(err.Error())
-			responseError := "error signing token"
-			http.Error(writer, errors.New(responseError).Error(), http.StatusInternalServerError)
-			return
+		// create and sign jwt token for client
+		if err == nil {
+			// create jwt token and sign it
+			var claims models.AppClaims = models.AppClaims{
+				UserId: user.Id,
+				StandardClaims: jwt.StandardClaims{
+					ExpiresAt: time.Now().Add(2 * time.Hour * 24).Unix(),
+				},
+			}
+			token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+			tokenString, err = token.SignedString([]byte(appServer.Config().JWTSecret))
+			if err != nil {
+				fmt.Println(err.Error())
+				err = errors.New("error signing token")
+				status = http.StatusInternalServerError
+			}
 		}
-		// finalize response to requests
-		writer.Header().Add("Content-type", "application/json")
-		writer.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(writer).Encode(LoginResponse{
-			Token: tokenString,
-		})
+		// send response to client
+		if err == nil {
+			// finalize response to requests
+			writer.Header().Add("Content-type", "application/json")
+			writer.WriteHeader(http.StatusAccepted)
+			json.NewEncoder(writer).Encode(LoginResponse{
+				Token: tokenString,
+			})
+		} else {
+			http.Error(writer, err.Error(), status)
+		}
 	}
 }
