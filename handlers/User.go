@@ -21,12 +21,7 @@ type SignUpLoginRequest struct {
 	Password string `json:"password"`
 }
 
-type SignUpResponse struct {
-	Id    string `json:"id"`
-	Email string `json:"email"`
-}
-
-type LoginResponse struct {
+type LoginSignUpResponse struct {
 	Token string `json:"token"`
 }
 
@@ -61,14 +56,30 @@ func SignUpHandler(appServer server.IServer) http.HandlerFunc {
 			if err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"` {
 				var newErr error = errors.New("user already exists")
 				http.Error(writer, newErr.Error(), http.StatusInternalServerError)
+				return
 			} else {
 				http.Error(writer, err.Error(), http.StatusInternalServerError)
+				return
 			}
 		}
+		// if user created successfuly then we create token
+		// and send it
+		var newClaims models.AppClaims = models.AppClaims{
+			UserId: user.Id,
+			Email:  user.Email,
+			StandardClaims: jwt.StandardClaims{
+				ExpiresAt: time.Now().Add(2 * time.Hour * 24).Unix(),
+			},
+		}
+		var token *jwt.Token = jwt.NewWithClaims(jwt.SigningMethodHS256, newClaims)
+		signedToken, signingErr := token.SignedString([]byte(appServer.Config().JWTSecret))
+		if signingErr != nil {
+			http.Error(writer, signingErr.Error(), http.StatusInternalServerError)
+			return
+		}
 		writer.Header().Add("Content-type", "application/json")
-		json.NewEncoder(writer).Encode(SignUpResponse{
-			Id:    user.Id,
-			Email: user.Email,
+		json.NewEncoder(writer).Encode(LoginSignUpResponse{
+			Token: signedToken,
 		})
 	}
 }
@@ -97,7 +108,7 @@ func LoginHandler(appServer server.IServer) http.HandlerFunc {
 			}
 			status = http.StatusInternalServerError
 		}
-		// autheticate user by checking that password sent by
+		// check that password sent by
 		// client is password stored at db
 		if err == nil {
 			err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
@@ -112,6 +123,7 @@ func LoginHandler(appServer server.IServer) http.HandlerFunc {
 			// create jwt token and sign it
 			var claims models.AppClaims = models.AppClaims{
 				UserId: user.Id,
+				Email:  user.Email,
 				StandardClaims: jwt.StandardClaims{
 					ExpiresAt: time.Now().Add(2 * time.Hour * 24).Unix(),
 				},
@@ -129,7 +141,7 @@ func LoginHandler(appServer server.IServer) http.HandlerFunc {
 			// finalize response to requests
 			writer.Header().Add("Content-type", "application/json")
 			writer.WriteHeader(http.StatusAccepted)
-			json.NewEncoder(writer).Encode(LoginResponse{
+			json.NewEncoder(writer).Encode(LoginSignUpResponse{
 				Token: tokenString,
 			})
 		} else {
