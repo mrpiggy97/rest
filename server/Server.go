@@ -20,15 +20,33 @@ type Config struct {
 
 type IServer interface {
 	Config() *Config
+	ServeHTTP(writer http.ResponseWriter, req *http.Request)
 }
 
 type Broker struct {
-	config *Config
-	router *mux.Router
+	config          *Config
+	router          *mux.Router
+	middlewareFuncs []MiddlewareFunc
 }
 
 func (broker *Broker) Config() *Config {
 	return broker.config
+}
+
+func (broker *Broker) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
+	var middlewareResponse MiddlewareResponse
+	for _, middlewareFunc := range broker.middlewareFuncs {
+		middlewareResponse = middlewareFunc(broker, writer, req)
+		req = middlewareResponse.Request
+		if middlewareResponse.Err != nil {
+			break
+		}
+	}
+	if middlewareResponse.Err != nil {
+		http.Error(writer, middlewareResponse.Err.Error(), middlewareResponse.StatusCode)
+	} else {
+		broker.router.ServeHTTP(writer, req)
+	}
 }
 
 func (broker *Broker) Start(binder func(appServer IServer, router *mux.Router)) {
@@ -40,7 +58,7 @@ func (broker *Broker) Start(binder func(appServer IServer, router *mux.Router)) 
 	}
 	repository.SetRepository(repo)
 	fmt.Println("starting server at port ", broker.config.Port)
-	if err := http.ListenAndServe(broker.config.Port, broker.router); err != nil {
+	if err := http.ListenAndServe(broker.config.Port, broker); err != nil {
 		log.Fatal(err.Error())
 	}
 }
@@ -56,8 +74,9 @@ func NewServer(cxt context.Context, config *Config) (*Broker, error) {
 		return nil, errors.New("databaseUrl must not be empty")
 	}
 	var broker *Broker = &Broker{
-		config: config,
-		router: mux.NewRouter(),
+		config:          config,
+		router:          mux.NewRouter(),
+		middlewareFuncs: []MiddlewareFunc{RequestIsAuthenticated, AuthorizationMiddleware},
 	}
 	return broker, nil
 }
