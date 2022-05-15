@@ -66,13 +66,12 @@ func RequestIsAuthenticated(appServer IServer, writer http.ResponseWriter, req *
 		userKey,
 		claims,
 	)
-	var newRequest *http.Request = req.Clone(newContext)
 	newContext = context.WithValue(
-		req.Context(),
+		newContext,
 		isAuthenticatedKey,
 		true,
 	)
-	newRequest = req.Clone(newContext)
+	var newRequest *http.Request = req.Clone(newContext)
 	return MiddlewareResponse{
 		Request:    newRequest,
 		Err:        nil,
