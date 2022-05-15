@@ -12,7 +12,7 @@ func AuthorizationMiddleware(appServer IServer, writer http.ResponseWriter, req 
 	// only login and signup routes can use POST method and not have its
 	// user authenticated
 	if req.Method != "GET" {
-		if req.URL.Path == "login" || req.URL.Path == "signup" {
+		if req.URL.Path == "/login" || req.URL.Path == "/signup" {
 			return MiddlewareResponse{Request: req, Err: nil, StatusCode: 0}
 		}
 		var isAuthenticated Key = "isAuthenticated"
