@@ -5,13 +5,13 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/mrpiggy97/rest/middleware"
 	"github.com/mrpiggy97/rest/models"
-	"github.com/mrpiggy97/rest/server"
 )
 
 // GetUserFromRequest will return user from request context
 func GetUserFromRequest(req *http.Request) (*models.AppClaims, bool) {
-	var isAuthenticatedKey server.Key = "isAuthenticated"
+	var isAuthenticatedKey middleware.Key = "isAuthenticated"
 	var isAuthenticated interface{} = req.Context().Value(isAuthenticatedKey)
 	authenticated, typeOk := isAuthenticated.(bool)
 	//type verification has failed
@@ -20,7 +20,7 @@ func GetUserFromRequest(req *http.Request) (*models.AppClaims, bool) {
 		log.Fatal(typeError.Error())
 	}
 	if authenticated {
-		var userKey server.Key = "user"
+		var userKey middleware.Key = "user"
 		var user interface{} = req.Context().Value(userKey)
 		var userClaims *models.AppClaims = user.(*models.AppClaims)
 		return userClaims, true
