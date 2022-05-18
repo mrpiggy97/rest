@@ -6,16 +6,17 @@ import (
 	"github.com/mrpiggy97/rest/models"
 )
 
-type IUserRepository interface {
+type IRepository interface {
 	InsertUser(cxt context.Context, user *models.User) error
 	GetUserById(cxt context.Context, id string) (*models.User, error)
 	GetUserByEmail(cxt context.Context, email string) (*models.User, error)
-	Close() error
+	InsertPost(cxt context.Context, post *models.Post) error
+	Close()
 }
 
-var implementation IUserRepository
+var implementation IRepository
 
-func SetRepository(repository IUserRepository) {
+func SetRepository(repository IRepository) {
 	implementation = repository
 }
 
@@ -29,4 +30,8 @@ func GetUserById(cxt context.Context, id string) (*models.User, error) {
 
 func GetUserByEmail(cxt context.Context, email string) (*models.User, error) {
 	return implementation.GetUserByEmail(cxt, email)
+}
+
+func InsertPost(cxt context.Context, post *models.Post) error {
+	return implementation.InsertPost(cxt, post)
 }
