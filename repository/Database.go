@@ -6,7 +6,7 @@ import (
 	"github.com/mrpiggy97/rest/models"
 )
 
-type IRepository interface {
+type IDatabase interface {
 	InsertUser(cxt context.Context, user *models.User) error
 	GetUserById(cxt context.Context, id string) (*models.User, error)
 	GetUserByEmail(cxt context.Context, email string) (*models.User, error)
@@ -14,9 +14,9 @@ type IRepository interface {
 	Close()
 }
 
-var implementation IRepository
+var implementation IDatabase
 
-func SetRepository(repository IRepository) {
+func SetDatabase(repository IDatabase) {
 	implementation = repository
 }
 
