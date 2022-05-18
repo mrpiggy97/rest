@@ -1,4 +1,4 @@
-package server
+package middleware
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/mrpiggy97/rest/models"
+	"github.com/mrpiggy97/rest/repository"
 )
 
 // RequestIsAuthenticated will pass to request context
@@ -17,7 +18,7 @@ import (
 // and can only be considered as not authenticated if no token was provided
 // in case token was provided but errors ocurred in its verification we will
 // send an error
-func RequestIsAuthenticated(appServer IServer, writer http.ResponseWriter, req *http.Request) MiddlewareResponse {
+func RequestIsAuthenticatedMiddleware(writer http.ResponseWriter, req *http.Request) MiddlewareResponse {
 
 	var tokenString string = strings.TrimSpace(req.Header.Get("Authorization"))
 	// no authorization token was given so request is not authenticated
@@ -32,7 +33,7 @@ func RequestIsAuthenticated(appServer IServer, writer http.ResponseWriter, req *
 		return MiddlewareResponse{Request: newRequest, Err: nil, StatusCode: 0}
 	}
 	token, parsinErr := jwt.ParseWithClaims(tokenString, &models.AppClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(appServer.Config().JWTSecret), nil
+		return []byte(repository.GetJWTSecret()), nil
 	})
 	// error trying to verify token, we send error in middlewareResponse
 	if parsinErr != nil {

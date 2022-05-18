@@ -1,4 +1,4 @@
-package server
+package middleware
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 )
 
 // AuthoriationMiddleware will check if user has permission to perform action
-func AuthorizationMiddleware(appServer IServer, writer http.ResponseWriter, req *http.Request) MiddlewareResponse {
+func AuthorizationMiddleware(writer http.ResponseWriter, req *http.Request) MiddlewareResponse {
 	// if request method is different than Get verify if user
 	// is authenticated, if so do not return error
 	// only login and signup routes can use POST method and not have its
