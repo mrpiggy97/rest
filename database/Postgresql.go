@@ -68,8 +68,20 @@ func (respository *PostgresqlRepository) GetUserByEmail(cxt context.Context, ema
 	return user, nil
 }
 
-func (repository *PostgresqlRepository) Close() error {
-	return repository.db.Close()
+func (repository *PostgresqlRepository) InsertPost(cxt context.Context, post *models.Post) error {
+	_, err := repository.db.ExecContext(
+		cxt,
+		"INSERT INTO POSTS(id, post_content, user_id)VALUES($1,$2,$3)",
+		post.Id, post.PostContent, post.UserId,
+	)
+	return err
+}
+
+func (repository *PostgresqlRepository) Close() {
+	var err error = repository.db.Close()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
 
 func NewPostgresqlRespository(url string) (*PostgresqlRepository, error) {
