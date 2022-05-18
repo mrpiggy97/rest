@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"errors"
+	"log"
 	"net/http"
 
 	"github.com/mrpiggy97/rest/models"
@@ -11,7 +13,12 @@ import (
 func GetUserFromRequest(req *http.Request) (*models.AppClaims, bool) {
 	var isAuthenticatedKey server.Key = "isAuthenticated"
 	var isAuthenticated interface{} = req.Context().Value(isAuthenticatedKey)
-	var authenticated bool = isAuthenticated.(bool)
+	authenticated, typeOk := isAuthenticated.(bool)
+	//type verification has failed
+	if !typeOk {
+		var typeError error = errors.New("error with interface type checking")
+		log.Fatal(typeError.Error())
+	}
 	if authenticated {
 		var userKey server.Key = "user"
 		var user interface{} = req.Context().Value(userKey)
