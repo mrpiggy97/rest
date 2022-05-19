@@ -15,7 +15,7 @@ func Runserver() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	db, dbErr := database.NewPostgresqlRespository(appServer.Config.DatabaseUrl)
+	db, dbErr := database.NewPostgresqlRepository(appServer.Config.DatabaseUrl)
 	if dbErr != nil {
 		log.Fatal(dbErr.Error())
 	}

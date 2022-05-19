@@ -20,8 +20,8 @@ func closeQuery(query *sql.Rows) {
 	}
 }
 
-func (respository *PostgresqlRepository) InsertUser(cxt context.Context, user *models.User) error {
-	_, err := respository.db.ExecContext(
+func (repo *PostgresqlRepository) InsertUser(cxt context.Context, user *models.User) error {
+	_, err := repo.db.ExecContext(
 		cxt,
 		"INSERT INTO users(id,email,password) VALUES($1,$2,$3);",
 		user.Id,
@@ -34,8 +34,8 @@ func (respository *PostgresqlRepository) InsertUser(cxt context.Context, user *m
 	return nil
 }
 
-func (respository *PostgresqlRepository) GetUserById(cxt context.Context, id string) (*models.User, error) {
-	query, queryErr := respository.db.QueryContext(cxt, "SELECT id,email FROM users WHERE id=$1;", id)
+func (repo *PostgresqlRepository) GetUserById(cxt context.Context, id string) (*models.User, error) {
+	query, queryErr := repo.db.QueryContext(cxt, "SELECT id,email FROM users WHERE id=$1;", id)
 	if queryErr != nil {
 		return nil, queryErr
 	}
@@ -51,8 +51,8 @@ func (respository *PostgresqlRepository) GetUserById(cxt context.Context, id str
 	return user, nil
 }
 
-func (respository *PostgresqlRepository) GetUserByEmail(cxt context.Context, email string) (*models.User, error) {
-	query, queryErr := respository.db.QueryContext(cxt, "SELECT id, email, password FROM users WHERE email=$1;", email)
+func (repo *PostgresqlRepository) GetUserByEmail(cxt context.Context, email string) (*models.User, error) {
+	query, queryErr := repo.db.QueryContext(cxt, "SELECT id, email, password FROM users WHERE email=$1;", email)
 	if queryErr != nil {
 		return nil, queryErr
 	}
@@ -68,8 +68,8 @@ func (respository *PostgresqlRepository) GetUserByEmail(cxt context.Context, ema
 	return user, nil
 }
 
-func (repository *PostgresqlRepository) InsertPost(cxt context.Context, post *models.Post) error {
-	_, err := repository.db.ExecContext(
+func (repo *PostgresqlRepository) InsertPost(cxt context.Context, post *models.Post) error {
+	_, err := repo.db.ExecContext(
 		cxt,
 		"INSERT INTO POSTS(id, post_content, user_id)VALUES($1,$2,$3)",
 		post.Id, post.PostContent, post.UserId,
@@ -77,8 +77,8 @@ func (repository *PostgresqlRepository) InsertPost(cxt context.Context, post *mo
 	return err
 }
 
-func (respository *PostgresqlRepository) GetPostById(cxt context.Context, id string) (*models.Post, error) {
-	query, queryErr := respository.db.QueryContext(cxt, "SELECT * FROM posts WHERE id=$1;", id)
+func (repo *PostgresqlRepository) GetPostById(cxt context.Context, id string) (*models.Post, error) {
+	query, queryErr := repo.db.QueryContext(cxt, "SELECT * FROM posts WHERE id=$1;", id)
 	if queryErr != nil {
 		return nil, queryErr
 	}
@@ -94,14 +94,34 @@ func (respository *PostgresqlRepository) GetPostById(cxt context.Context, id str
 	return post, nil
 }
 
-func (repository *PostgresqlRepository) Close() {
-	var err error = repository.db.Close()
+func (repo *PostgresqlRepository) UpdatePost(cxt context.Context, post *models.Post) error {
+	_, err := repo.db.ExecContext(
+		cxt,
+		"UPDATE posts SET post_content=$1 WHERE id=$2 and user_id=$3;",
+		post.PostContent,
+		post.Id,
+		post.UserId,
+	)
+	return err
+}
+
+func (repo *PostgresqlRepository) DeletePost(cxt context.Context, post *models.Post) error {
+	_, err := repo.db.ExecContext(
+		cxt,
+		"DELETE FROM posts where id=$1 and user_id=$2;",
+		post.Id, post.UserId,
+	)
+	return err
+}
+
+func (repo *PostgresqlRepository) Close() {
+	var err error = repo.db.Close()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
-func NewPostgresqlRespository(url string) (*PostgresqlRepository, error) {
+func NewPostgresqlRepository(url string) (*PostgresqlRepository, error) {
 	//postgres url should be in the following format
 	// postgres://username:password@host:port/dbname?sslmode=disable
 	db, err := sql.Open("postgres", url)

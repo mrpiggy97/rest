@@ -17,25 +17,23 @@ type InsertPostRequest struct {
 	PostContent string `json:"post_content"`
 }
 
-type InsertPostRespone struct {
+type InsertPostResponse struct {
 	Message string `json:"message"`
 }
 
 func InsertPostHandler(writer http.ResponseWriter, req *http.Request) {
 	var decodedBody *InsertPostRequest = new(InsertPostRequest)
-	requestUser, requestAuthenticated := utils.GetUserFromRequest(req)
+	requestUser, _ := utils.GetUserFromRequest(req)
 	var newPost *models.Post = new(models.Post)
 	var err error
 	var statusCode int
 
-	if !requestAuthenticated {
-		err = errors.New("user not authorized to perform action")
-		statusCode = http.StatusUnauthorized
-	}
+	// decode request
 	if err == nil {
 		err = json.NewDecoder(req.Body).Decode(decodedBody)
 		statusCode = http.StatusBadRequest
 	}
+	// insert post into db
 	if err == nil {
 		var postId string = ksuid.New().String()
 		newPost.Id = postId
@@ -44,10 +42,11 @@ func InsertPostHandler(writer http.ResponseWriter, req *http.Request) {
 		err = repository.InsertPost(context.Background(), newPost)
 		statusCode = http.StatusInternalServerError
 	}
+	//send response to client
 	if err == nil {
 		writer.Header().Add("Content-type", "application/json")
 		writer.WriteHeader(http.StatusOK)
-		var response InsertPostRespone = InsertPostRespone{
+		var response InsertPostResponse = InsertPostResponse{
 			Message: "successfuly created post",
 		}
 		json.NewEncoder(writer).Encode(response)
@@ -66,5 +65,98 @@ func GetPostById(writer http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(writer).Encode(post)
 	} else {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func UpdatePost(writer http.ResponseWriter, req *http.Request) {
+	var decodedBody *InsertPostRequest = new(InsertPostRequest)
+	requestUser, _ := utils.GetUserFromRequest(req)
+	var post *models.Post = new(models.Post)
+	var err error
+	var statusCode int
+	var params map[string]string = mux.Vars(req)
+	var postId string = params["id"]
+
+	// decode request
+	if err == nil {
+		err = json.NewDecoder(req.Body).Decode(decodedBody)
+		if err != nil {
+			statusCode = http.StatusBadRequest
+		}
+	}
+	// get post to edit
+	if err == nil {
+		post, err = repository.GetPostById(context.Background(), postId)
+		if err != nil {
+			statusCode = http.StatusInternalServerError
+		}
+	}
+	// verify post is owned by user request
+	if err == nil {
+		if requestUser.UserId != post.UserId {
+			err = errors.New("unauthorized to perform action on object")
+			statusCode = http.StatusUnauthorized
+		}
+	}
+	//update post
+	if err == nil {
+		post.PostContent = decodedBody.PostContent
+		err = repository.UpdatePost(context.Background(), post)
+		if err != nil {
+			statusCode = http.StatusInternalServerError
+		}
+	}
+	// send response to client
+	if err == nil {
+		writer.Header().Add("Content-type", "application/json")
+		writer.WriteHeader(http.StatusOK)
+		var response InsertPostResponse = InsertPostResponse{
+			Message: "successfuly updated post post",
+		}
+		json.NewEncoder(writer).Encode(response)
+	} else {
+		http.Error(writer, err.Error(), statusCode)
+	}
+}
+
+func DeletePost(writer http.ResponseWriter, req *http.Request) {
+	var err error
+	var post *models.Post = new(models.Post)
+	var statusCode int
+	requestUser, _ := utils.GetUserFromRequest(req)
+	var params map[string]string = mux.Vars(req)
+	var postId string = params["id"]
+
+	// get post to delete
+	post, err = repository.GetPostById(context.Background(), postId)
+	if err != nil {
+		statusCode = http.StatusInternalServerError
+	}
+
+	// check that post is owned by request user
+	if err == nil {
+		if post.UserId != requestUser.UserId {
+			err = errors.New("unauthorized to perform action on object")
+			statusCode = http.StatusUnauthorized
+		}
+	}
+
+	// delete post
+	if err == nil {
+		err = repository.DeletePost(context.Background(), post)
+		if err != nil {
+			statusCode = http.StatusInternalServerError
+		}
+	}
+
+	// send response to client
+	if err == nil {
+		writer.Header().Add("Content-type", "application/json")
+		writer.WriteHeader(http.StatusOK)
+		var response map[string]string = make(map[string]string)
+		response["message"] = "successfuly deleted post"
+		json.NewEncoder(writer).Encode(response)
+	} else {
+		http.Error(writer, err.Error(), statusCode)
 	}
 }
