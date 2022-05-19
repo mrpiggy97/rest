@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/mrpiggy97/rest/contextTypes"
 	"github.com/mrpiggy97/rest/models"
 	"github.com/mrpiggy97/rest/repository"
 )
@@ -23,7 +24,7 @@ func RequestIsAuthenticatedMiddleware(writer http.ResponseWriter, req *http.Requ
 	var tokenString string = strings.TrimSpace(req.Header.Get("Authorization"))
 	// no authorization token was given so request is not authenticated
 	if len(tokenString) == 0 {
-		var isAuthenticated Key = "isAuthenticated"
+		var isAuthenticated contextTypes.Key = "isAuthenticated"
 		var newContext context.Context = context.WithValue(
 			req.Context(),
 			isAuthenticated,
@@ -60,8 +61,8 @@ func RequestIsAuthenticatedMiddleware(writer http.ResponseWriter, req *http.Requ
 	}
 	// token is assumed to be valid we will proceed to
 	// get user from claims
-	var userKey Key = "user"
-	var isAuthenticatedKey Key = "isAuthenticated"
+	var userKey contextTypes.Key = "user"
+	var isAuthenticatedKey contextTypes.Key = "isAuthenticated"
 	var newContext context.Context = context.WithValue(
 		req.Context(),
 		userKey,

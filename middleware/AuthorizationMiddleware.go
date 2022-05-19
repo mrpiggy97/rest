@@ -3,6 +3,8 @@ package middleware
 import (
 	"errors"
 	"net/http"
+
+	"github.com/mrpiggy97/rest/utils"
 )
 
 // AuthoriationMiddleware will check if user has permission to perform action
@@ -15,8 +17,8 @@ func AuthorizationMiddleware(writer http.ResponseWriter, req *http.Request) Midd
 		if req.URL.Path == "/login" || req.URL.Path == "/signup" {
 			return MiddlewareResponse{Request: req, Err: nil, StatusCode: 0}
 		}
-		var isAuthenticated Key = "isAuthenticated"
-		switch req.Context().Value(isAuthenticated) {
+		_, isAuthenticated := utils.GetUserFromRequest(req)
+		switch isAuthenticated {
 		case true:
 			return MiddlewareResponse{Request: req, Err: nil, StatusCode: 0}
 		case false:
