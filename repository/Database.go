@@ -11,6 +11,7 @@ type IDatabase interface {
 	GetUserById(cxt context.Context, id string) (*models.User, error)
 	GetUserByEmail(cxt context.Context, email string) (*models.User, error)
 	InsertPost(cxt context.Context, post *models.Post) error
+	GetPostById(cxt context.Context, id string) (*models.Post, error)
 	Close()
 }
 
@@ -34,4 +35,8 @@ func GetUserByEmail(cxt context.Context, email string) (*models.User, error) {
 
 func InsertPost(cxt context.Context, post *models.Post) error {
 	return implementation.InsertPost(cxt, post)
+}
+
+func GetPostById(cxt context.Context, id string) (*models.Post, error) {
+	return implementation.GetPostById(cxt, id)
 }

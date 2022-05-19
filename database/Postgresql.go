@@ -77,6 +77,23 @@ func (repository *PostgresqlRepository) InsertPost(cxt context.Context, post *mo
 	return err
 }
 
+func (respository *PostgresqlRepository) GetPostById(cxt context.Context, id string) (*models.Post, error) {
+	query, queryErr := respository.db.QueryContext(cxt, "SELECT * FROM posts WHERE id=$1;", id)
+	if queryErr != nil {
+		return nil, queryErr
+	}
+	var post *models.Post = new(models.Post)
+	for query.Next() {
+		scanningErr := query.Scan(&post.Id, &post.PostContent, &post.UserId, &post.UserId)
+		if scanningErr != nil {
+			return nil, scanningErr
+		}
+	}
+
+	defer closeQuery(query)
+	return post, nil
+}
+
 func (repository *PostgresqlRepository) Close() {
 	var err error = repository.db.Close()
 	if err != nil {

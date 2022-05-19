@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/mrpiggy97/rest/models"
 	"github.com/mrpiggy97/rest/repository"
 	"github.com/mrpiggy97/rest/utils"
@@ -52,5 +53,18 @@ func InsertPostHandler(writer http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(writer).Encode(response)
 	} else {
 		http.Error(writer, err.Error(), statusCode)
+	}
+}
+
+func GetPostById(writer http.ResponseWriter, req *http.Request) {
+	var err error
+	var post *models.Post = new(models.Post)
+	params := mux.Vars(req)
+	post, err = repository.GetPostById(context.Background(), params["id"])
+	if err == nil {
+		writer.Header().Add("Content-type", "application/json")
+		json.NewEncoder(writer).Encode(post)
+	} else {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
 }
