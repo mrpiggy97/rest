@@ -14,6 +14,7 @@ type IDatabase interface {
 	GetPostById(cxt context.Context, id string) (*models.Post, error)
 	UpdatePost(cxt context.Context, post *models.Post) error
 	DeletePost(cxt context.Context, post *models.Post) error
+	ListPost(cxt context.Context, page uint64) ([]*models.Post, error)
 	Close()
 }
 
@@ -49,4 +50,8 @@ func UpdatePost(cxt context.Context, post *models.Post) error {
 
 func DeletePost(cxt context.Context, post *models.Post) error {
 	return implementation.DeletePost(cxt, post)
+}
+
+func ListPost(cxt context.Context, page uint64) ([]*models.Post, error) {
+	return implementation.ListPost(cxt, page)
 }

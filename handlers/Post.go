@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/mrpiggy97/rest/models"
@@ -156,6 +157,41 @@ func DeletePost(writer http.ResponseWriter, req *http.Request) {
 		var response map[string]string = make(map[string]string)
 		response["message"] = "successfuly deleted post"
 		json.NewEncoder(writer).Encode(response)
+	} else {
+		http.Error(writer, err.Error(), statusCode)
+	}
+}
+
+func ListPostHandler(writer http.ResponseWriter, req *http.Request) {
+	var err error
+	var posts []*models.Post = []*models.Post{}
+	var pageString string = req.URL.Query().Get("page")
+	var page int
+	var statusCode int
+
+	if pageString == "" {
+		err = errors.New("page query is empty")
+		statusCode = http.StatusBadRequest
+	}
+
+	if err == nil {
+		page, err = strconv.Atoi(pageString)
+		if err != nil {
+			statusCode = http.StatusInternalServerError
+		}
+	}
+
+	if err == nil {
+		posts, err = repository.ListPost(context.Background(), uint64(page))
+		if err != nil {
+			statusCode = http.StatusInternalServerError
+		}
+	}
+
+	if err == nil {
+		writer.Header().Add("Content-type", "application/json")
+		writer.WriteHeader(http.StatusOK)
+		json.NewEncoder(writer).Encode(posts)
 	} else {
 		http.Error(writer, err.Error(), statusCode)
 	}

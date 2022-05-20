@@ -114,6 +114,29 @@ func (repo *PostgresqlRepository) DeletePost(cxt context.Context, post *models.P
 	return err
 }
 
+func (repo *PostgresqlRepository) ListPost(cxt context.Context, page uint64) ([]*models.Post, error) {
+	var initPage uint64 = page - 1
+	rows, err := repo.db.QueryContext(
+		cxt,
+		"SELECT * FROM posts LIMIT $1 OFFSET $2;",
+		2, initPage*2, //2 being the number of posts per page
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer closeQuery(rows)
+	var posts []*models.Post = []*models.Post{}
+	for rows.Next() {
+		var post *models.Post = new(models.Post)
+		var scanningErr error = rows.Scan(&post.Id, &post.PostContent, &post.CreatedAt, &post.UserId)
+		if scanningErr != nil {
+			return nil, scanningErr
+		}
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
+
 func (repo *PostgresqlRepository) Close() {
 	var err error = repo.db.Close()
 	if err != nil {
