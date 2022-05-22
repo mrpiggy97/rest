@@ -12,7 +12,6 @@ import (
 
 type IServer interface {
 	ServeHTTP(writer http.ResponseWriter, req *http.Request)
-	GetHub() *websockets.Hub
 }
 
 type Server struct {
@@ -20,10 +19,6 @@ type Server struct {
 	Router          *mux.Router
 	MiddlewareFuncs []middleware.MiddlewareFunc
 	Hub             *websockets.Hub
-}
-
-func (server *Server) GetHub() *websockets.Hub {
-	return server.Hub
 }
 
 func (server *Server) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
