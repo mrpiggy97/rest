@@ -7,16 +7,23 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/mrpiggy97/rest/middleware"
+	"github.com/mrpiggy97/rest/websockets"
 )
 
 type IServer interface {
 	ServeHTTP(writer http.ResponseWriter, req *http.Request)
+	GetHub() *websockets.Hub
 }
 
 type Server struct {
 	Config          *Config
 	Router          *mux.Router
 	MiddlewareFuncs []middleware.MiddlewareFunc
+	Hub             *websockets.Hub
+}
+
+func (server *Server) GetHub() *websockets.Hub {
+	return server.Hub
 }
 
 func (server *Server) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
@@ -40,6 +47,7 @@ func NewServer(cxt context.Context) (*Server, error) {
 		Config:          GetConfig(),
 		MiddlewareFuncs: GetMiddlewareFuncs(),
 		Router:          GetRouter(),
+		Hub:             GetHub(),
 	}
 	if server.Config.Port == "" {
 		return nil, errors.New("port must not be empty")
