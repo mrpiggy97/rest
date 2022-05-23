@@ -21,7 +21,7 @@ func Runserver() {
 	}
 	repository.SetDatabase(db)
 	repository.SetConfig(appServer.Config)
-	repository.SetHub(appServer.GetHub())
+	repository.SetHub(appServer.Hub)
 	go repository.AppHub.Run()
 	fmt.Println("starting appServer at port ", appServer.Config.Port)
 	if err := http.ListenAndServe(appServer.Config.Port, appServer); err != nil {
