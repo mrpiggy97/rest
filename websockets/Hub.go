@@ -17,6 +17,12 @@ type Hub struct {
 	Locker     *sync.Mutex
 }
 
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
 func (hub *Hub) HandleWebSocket(writer http.ResponseWriter, req *http.Request) {
 	socket, err := upgrader.Upgrade(writer, req, nil)
 	if err != nil {
@@ -83,10 +89,4 @@ func NewHub() *Hub {
 		Locker:     new(sync.Mutex),
 		Number:     make(chan int, 1),
 	}
-}
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
 }
