@@ -23,6 +23,15 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// flow of code will be the following hub.run will be waiting for
+// register channel to send any new *Client type, when a request is sent
+// to handlers.WebSocketHandler register channel will send new *Client created
+// and will run client.Write which will have a channel waiting for a byte message
+// once we get another request to an eligible endpoint, that same endpoint will
+// send a message through hub.BroadCast, which will send a byte message
+// that will be recieved by every client in its array of clients
+// client.Write will then send that same byte message
+// through websocket connection
 func (hub *Hub) HandleWebSocket(writer http.ResponseWriter, req *http.Request) {
 	socket, err := upgrader.Upgrade(writer, req, nil)
 	if err != nil {
@@ -32,7 +41,6 @@ func (hub *Hub) HandleWebSocket(writer http.ResponseWriter, req *http.Request) {
 	var client *Client = NewClient(hub, socket)
 	fmt.Println(client.Id, client.Socket.RemoteAddr().String())
 	hub.Register <- client
-	fmt.Println("it gets here")
 	go client.Write()
 }
 
