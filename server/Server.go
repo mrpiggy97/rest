@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -19,6 +20,7 @@ type Server struct {
 	Router          *mux.Router
 	MiddlewareFuncs []middleware.MiddlewareFunc
 	Hub             *websockets.Hub
+	AllowedOrigins  []string
 }
 
 func (server *Server) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
@@ -31,6 +33,7 @@ func (server *Server) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 		}
 	}
 	if middlewareResponse.Err != nil {
+		fmt.Println("returning error")
 		http.Error(writer, middlewareResponse.Err.Error(), middlewareResponse.StatusCode)
 	} else {
 		server.Router.ServeHTTP(writer, req)
@@ -38,11 +41,13 @@ func (server *Server) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 }
 
 func NewServer(cxt context.Context) (*Server, error) {
+	var allowedOrigins []string = []string{"localhost:8000"}
 	var server *Server = &Server{
 		Config:          GetConfig(),
 		MiddlewareFuncs: GetMiddlewareFuncs(),
 		Router:          GetRouter(),
 		Hub:             GetHub(),
+		AllowedOrigins:  allowedOrigins,
 	}
 	if server.Config.Port == "" {
 		return nil, errors.New("port must not be empty")

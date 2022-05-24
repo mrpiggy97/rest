@@ -8,6 +8,7 @@ import (
 
 	"github.com/mrpiggy97/rest/database"
 	"github.com/mrpiggy97/rest/repository"
+	"github.com/rs/cors"
 )
 
 func Runserver() {
@@ -24,7 +25,13 @@ func Runserver() {
 	repository.SetHub(appServer.Hub)
 	go repository.AppHub.Run()
 	fmt.Println("starting appServer at port ", appServer.Config.Port)
-	if err := http.ListenAndServe(appServer.Config.Port, appServer); err != nil {
+	var corsOptions cors.Options = cors.Options{
+		AllowedOrigins: []string{"http://localhost:8000"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"Authorization", "Content-type"},
+	}
+	var corsHandler *cors.Cors = cors.New(corsOptions)
+	if err := http.ListenAndServe(appServer.Config.Port, corsHandler.Handler(appServer)); err != nil {
 		log.Fatal(err.Error())
 	}
 }
