@@ -18,5 +18,6 @@ func GetRouter() *mux.Router {
 	serverRouter.HandleFunc("/posts/{id}", handlers.DeletePost).Methods(http.MethodDelete)
 	serverRouter.HandleFunc("/posts-list", handlers.ListPostHandler).Methods(http.MethodGet)
 	serverRouter.HandleFunc("/ws", handlers.WebSocketHandler)
+	serverRouter.HandleFunc("/chat", handlers.ChatHandler).Methods(http.MethodPost)
 	return serverRouter
 }
