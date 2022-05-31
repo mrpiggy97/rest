@@ -20,7 +20,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token          string `json:"token"`
+	ExpirationDate *jwt.NumericDate
 }
 
 func LoginHandler(writer http.ResponseWriter, req *http.Request) {
@@ -29,6 +30,7 @@ func LoginHandler(writer http.ResponseWriter, req *http.Request) {
 	var user *models.User = new(models.User)
 	var tokenString string = ""
 	var status int
+	var expirationDate *jwt.NumericDate = new(jwt.NumericDate)
 
 	// decode request
 	err := json.NewDecoder(req.Body).Decode(request)
@@ -59,11 +61,12 @@ func LoginHandler(writer http.ResponseWriter, req *http.Request) {
 	// create and sign jwt token for client
 	if err == nil {
 		// create jwt token and sign it
+		expirationDate = jwt.NewNumericDate(time.Now().Add(2 * time.Hour * 24))
 		var claims models.AppClaims = models.AppClaims{
 			UserId: user.Id,
 			Email:  user.Email,
-			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: time.Now().Add(2 * time.Hour * 24).Unix(),
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: expirationDate,
 			},
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -80,7 +83,8 @@ func LoginHandler(writer http.ResponseWriter, req *http.Request) {
 		writer.Header().Add("Content-type", "application/json")
 		writer.WriteHeader(http.StatusAccepted)
 		json.NewEncoder(writer).Encode(LoginResponse{
-			Token: tokenString,
+			Token:          tokenString,
+			ExpirationDate: expirationDate,
 		})
 	} else {
 		http.Error(writer, err.Error(), status)

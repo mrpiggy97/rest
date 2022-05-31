@@ -20,11 +20,13 @@ type SignUpRequest struct {
 }
 
 type SignUpResponse struct {
-	Token string `json:"token"`
+	Token          string `json:"token"`
+	ExpirationDate *jwt.NumericDate
 }
 
 func SignUpHandler(writer http.ResponseWriter, req *http.Request) {
 	var request *SignUpRequest = new(SignUpRequest)
+	var expirationDate *jwt.NumericDate = new(jwt.NumericDate)
 	err := json.NewDecoder(req.Body).Decode(request)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
@@ -61,11 +63,12 @@ func SignUpHandler(writer http.ResponseWriter, req *http.Request) {
 	}
 	// if user created successfuly then we create token
 	// and send it
+	expirationDate = jwt.NewNumericDate(time.Now().Add(2 * time.Hour * 24))
 	var newClaims models.AppClaims = models.AppClaims{
 		UserId: user.Id,
 		Email:  user.Email,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(2 * time.Hour * 24).Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: expirationDate,
 		},
 	}
 	var token *jwt.Token = jwt.NewWithClaims(jwt.SigningMethodHS256, newClaims)
@@ -76,6 +79,7 @@ func SignUpHandler(writer http.ResponseWriter, req *http.Request) {
 	}
 	writer.Header().Add("Content-type", "application/json")
 	json.NewEncoder(writer).Encode(SignUpResponse{
-		Token: signedToken,
+		Token:          signedToken,
+		ExpirationDate: expirationDate,
 	})
 }
