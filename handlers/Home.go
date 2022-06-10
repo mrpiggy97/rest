@@ -23,7 +23,7 @@ func HomeHandler(writer http.ResponseWriter, req *http.Request) {
 		Type:    "home_message",
 		Payload: "this is the message",
 	}
-	repository.AppHub.BroadCast(HomeMessage, nil)
+	repository.AppHub.BroadCast(HomeMessage, "")
 	json.NewEncoder(writer).Encode(HomeResponse{
 		Message:           "welcome to the api",
 		Status:            true,

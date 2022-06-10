@@ -49,7 +49,7 @@ func InsertPostHandler(writer http.ResponseWriter, req *http.Request) {
 			Type:    "post_created",
 			Payload: newPost,
 		}
-		repository.AppHub.BroadCast(postMessage, nil)
+		repository.AppHub.BroadCast(postMessage, "")
 		writer.Header().Add("Content-type", "application/json")
 		writer.WriteHeader(http.StatusOK)
 		var response InsertPostResponse = InsertPostResponse{
