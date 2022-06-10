@@ -14,7 +14,6 @@ type Client struct {
 }
 
 func (client *Client) Write() {
-	fmt.Println("writing bruh")
 	for {
 		select {
 		case message, ok := <-client.Outbound:
