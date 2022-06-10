@@ -80,10 +80,10 @@ func (hub *Hub) Run() {
 	}
 }
 
-func (hub *Hub) BroadCast(message interface{}, ignore *Client) {
+func (hub *Hub) BroadCast(message interface{}, ignoreClient string) {
 	data, _ := json.Marshal(message)
 	for _, client := range hub.Clients {
-		if client != ignore {
+		if client.Id != ignoreClient {
 			client.Outbound <- data
 		}
 	}
