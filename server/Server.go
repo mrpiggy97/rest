@@ -41,7 +41,7 @@ func (server *Server) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 }
 
 func NewServer(cxt context.Context) (*Server, error) {
-	var allowedOrigins []string = []string{"localhost:8000"}
+	var allowedOrigins []string = GetAllowedCrossSiteOrigin()
 	var server *Server = &Server{
 		Config:          GetConfig(),
 		MiddlewareFuncs: GetMiddlewareFuncs(),

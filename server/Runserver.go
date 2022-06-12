@@ -26,7 +26,7 @@ func Runserver() {
 	go repository.AppHub.Run()
 	fmt.Println("starting appServer at port ", appServer.Config.Port)
 	var corsOptions cors.Options = cors.Options{
-		AllowedOrigins: []string{"http://localhost:8000"},
+		AllowedOrigins: appServer.AllowedOrigins,
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowedHeaders: []string{"Authorization", "Content-type"},
 	}
