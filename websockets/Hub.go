@@ -32,17 +32,6 @@ var upgrader = websocket.Upgrader{
 // that will be recieved by every client in its array of clients
 // client.Write will then send that same byte message
 // through websocket connection
-func (hub *Hub) HandleWebSocket(writer http.ResponseWriter, req *http.Request) {
-	socket, err := upgrader.Upgrade(writer, req, nil)
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return
-	}
-	var client *Client = NewClient(hub, socket)
-	fmt.Println(client.Id, client.Socket.RemoteAddr().String())
-	hub.Register <- client
-	go client.Write()
-}
 
 func (hub *Hub) onConnect(client *Client) {
 	fmt.Println("client has connected ", client.Socket.RemoteAddr())
