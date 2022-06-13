@@ -22,7 +22,10 @@ func (client *Client) Write() {
 				return
 			}
 			fmt.Println("sending message")
-			client.Socket.WriteMessage(websocket.TextMessage, message)
+			var sendingErr error = client.Socket.WriteMessage(websocket.TextMessage, message)
+			if sendingErr != nil {
+				fmt.Println(sendingErr.Error())
+			}
 		}
 	}
 }
