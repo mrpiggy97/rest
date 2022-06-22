@@ -20,8 +20,7 @@ func WebSocketHandler(writer http.ResponseWriter, req *http.Request) {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	var newClient *websockets.Client = websockets.NewClient(repository.AppHub, socket)
-	repository.AppHub.Register <- newClient
+	var newClient *websockets.Client = websockets.NewClient(socket)
+	repository.RegisterClient(newClient)
 	go newClient.Write()
 }
