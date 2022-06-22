@@ -25,5 +25,5 @@ func ChatHandler(writer http.ResponseWriter, req *http.Request) {
 		Message: request.Message,
 		UUID:    uuid,
 	}
-	repository.AppHub.BroadCast(message, "")
+	repository.BroadCast(message, "")
 }

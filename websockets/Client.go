@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/gorilla/websocket"
+	"github.com/mrpiggy97/rest/repository"
 )
 
 type Client struct {
-	Hub      *Hub
 	Id       string
 	Socket   *websocket.Conn
 	Outbound chan []byte
@@ -21,19 +21,35 @@ func (client *Client) Write() {
 				client.Socket.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-			fmt.Println("sending message")
+			fmt.Println("sending message from ", client.Id)
+			var activeClients int = repository.GetNumberOfActiveClients()
+			var log string = fmt.Sprintf("number of active clients %d", activeClients)
+			fmt.Println(log)
 			var sendingErr error = client.Socket.WriteMessage(websocket.TextMessage, message)
 			if sendingErr != nil {
 				fmt.Println(sendingErr.Error())
+				break
 			}
 		}
 	}
 }
 
-func NewClient(hub *Hub, socket *websocket.Conn) *Client {
+func (client *Client) GetId() string {
+	return client.Id
+}
+
+func (client *Client) CloseConnection() {
+	client.Socket.Close()
+}
+
+func (client *Client) Send(data []byte) {
+	client.Outbound <- data
+}
+
+func NewClient(socket *websocket.Conn) *Client {
 	return &Client{
-		Hub:      hub,
 		Socket:   socket,
 		Outbound: make(chan []byte, 1),
+		Id:       socket.RemoteAddr().String(),
 	}
 }

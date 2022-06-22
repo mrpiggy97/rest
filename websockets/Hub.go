@@ -7,12 +7,13 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/mrpiggy97/rest/repository"
 )
 
 type Hub struct {
-	Clients    []*Client
-	Register   chan *Client
-	Unregister chan *Client
+	Clients    []repository.IClient
+	Register   chan repository.IClient
+	Unregister chan repository.IClient
 	Number     chan int
 	Locker     *sync.Mutex
 }
@@ -33,26 +34,37 @@ var upgrader = websocket.Upgrader{
 // client.Write will then send that same byte message
 // through websocket connection
 
-func (hub *Hub) onConnect(client *Client) {
-	fmt.Println("client has connected ", client.Socket.RemoteAddr())
+func (hub *Hub) OnConnect(client repository.IClient) {
+	fmt.Println("client has connected ", client.GetId())
 	hub.Locker.Lock()
 	defer hub.Locker.Unlock()
-	client.Id = client.Socket.RemoteAddr().String()
 	hub.Clients = append(hub.Clients, client)
 }
 
-func (hub *Hub) onDisconnect(client *Client) {
-	fmt.Println("client has disconnected ", client.Socket.RemoteAddr().String())
-	client.Socket.Close()
+func (hub *Hub) OnDisconnect(client repository.IClient) {
+	fmt.Println("client has disconnected ", client.GetId())
+	client.CloseConnection()
 	hub.Locker.Lock()
-	var newSlice []*Client = make([]*Client, 0)
+	var newSlice []repository.IClient = make([]repository.IClient, 0)
 	defer hub.Locker.Unlock()
 	for _, currentClient := range hub.Clients {
-		if currentClient.Id != client.Id {
+		if currentClient.GetId() != client.GetId() {
 			newSlice = append(newSlice, currentClient)
 		}
 	}
 	hub.Clients = newSlice
+}
+
+func (hub *Hub) GetNumberOfActiveClients() int {
+	return len(hub.Clients)
+}
+
+func (hub *Hub) RegisterClient(client repository.IClient) {
+	hub.Register <- client
+}
+
+func (hub *Hub) DeregisterClient(client repository.IClient) {
+	hub.Unregister <- client
 }
 
 func (hub *Hub) Run() {
@@ -61,10 +73,10 @@ func (hub *Hub) Run() {
 		select {
 		case client := <-hub.Register:
 			fmt.Println("registering client")
-			hub.onConnect(client)
+			hub.OnConnect(client)
 		case client := <-hub.Unregister:
 			fmt.Println("disconnecting client")
-			hub.onDisconnect(client)
+			hub.OnDisconnect(client)
 		}
 	}
 }
@@ -72,17 +84,17 @@ func (hub *Hub) Run() {
 func (hub *Hub) BroadCast(message interface{}, ignoreClient string) {
 	data, _ := json.Marshal(message)
 	for _, client := range hub.Clients {
-		if client.Id != ignoreClient {
-			client.Outbound <- data
+		if client.GetId() != ignoreClient {
+			client.Send(data)
 		}
 	}
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		Clients:    make([]*Client, 0),
-		Register:   make(chan *Client, 100),
-		Unregister: make(chan *Client, 100),
+		Clients:    make([]repository.IClient, 0),
+		Register:   make(chan repository.IClient, 100),
+		Unregister: make(chan repository.IClient, 100),
 		Locker:     new(sync.Mutex),
 		Number:     make(chan int, 1),
 	}
