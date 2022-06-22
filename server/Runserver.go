@@ -23,7 +23,7 @@ func Runserver() {
 	repository.SetDatabase(db)
 	repository.SetConfig(appServer.Config)
 	repository.SetHub(appServer.Hub)
-	go repository.AppHub.Run()
+	repository.RunHub()
 	fmt.Println("starting appServer at port ", appServer.Config.Port)
 	var corsOptions cors.Options = cors.Options{
 		AllowedOrigins: appServer.AllowedOrigins,
