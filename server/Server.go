@@ -33,7 +33,7 @@ func (server *Server) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 		}
 	}
 	if middlewareResponse.Err != nil {
-		fmt.Println("returning error")
+		fmt.Println("returning error ", middlewareResponse.Err.Error())
 		http.Error(writer, middlewareResponse.Err.Error(), middlewareResponse.StatusCode)
 	} else {
 		server.Router.ServeHTTP(writer, req)
