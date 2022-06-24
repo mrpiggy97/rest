@@ -19,6 +19,7 @@ func (client *Client) Write() {
 		case message, ok := <-client.Outbound:
 			if !ok {
 				client.Socket.WriteMessage(websocket.CloseMessage, []byte{})
+				repository.DeregisterClient(client)
 				return
 			}
 			fmt.Println("sending message from ", client.Id)
@@ -28,7 +29,7 @@ func (client *Client) Write() {
 			var sendingErr error = client.Socket.WriteMessage(websocket.TextMessage, message)
 			if sendingErr != nil {
 				fmt.Println(sendingErr.Error())
-				break
+				close(client.Outbound)
 			}
 		}
 	}
