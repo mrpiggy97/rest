@@ -31,7 +31,8 @@ func Runserver() {
 		AllowedHeaders: []string{"Authorization", "Content-type"},
 	}
 	var corsHandler *cors.Cors = cors.New(corsOptions)
-	if err := http.ListenAndServe(appServer.Config.Port, corsHandler.Handler(appServer)); err != nil {
+	var address string = fmt.Sprintf("0.0.0.0:%v", appServer.Config.Port)
+	if err := http.ListenAndServe(address, corsHandler.Handler(appServer)); err != nil {
 		log.Fatal(err.Error())
 	}
 }
