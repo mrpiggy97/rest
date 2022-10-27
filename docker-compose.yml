@@ -1,0 +1,20 @@
+version: "3.0"
+services:
+  database:
+    image: "fabianjesusrivas/restdb:v1.0.0"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=base_username
+      - POSTGRES_PASSWORD=base_password
+      - POSTGRES_DB=rest_db
+  app:
+    image: "fabianjesusrivas/rest:v1.0.0"
+    depends_on:
+      - database
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgres://base_username:base_password/@database:5432/rest_db?sslmode=disable
+      - PORT=5000
+      - JWT_SECRET=ajwai5UGQZ5DubRXR/A4u11rfjTdejxYvhjuosHNRs6R+w7eD7Ao/fP3sZz5NUOXMbrrCn2BprJvf95wcpjSX9GwxIziF+l1LjSryfv3547K/+amDBZ1DCyplZPqhU+UtsLbqSbiAYUuuoOwFLM39SvkuQaa+3pI74IfTTG53qH1eptsX4qJx4w8YQmZEKFG4deZO6N0gQMK+wchodFGFuJ27qGWyzpRAEp2GLaEBKDspjzJUmrCN0fPOjmoEpQkyxZv37zSG4q/wT8cR8PFY9R8awyOUWmkQomcB5Yawo6tXdUS7xD4Qe0eShN+LKMbFzeeiJ5gXhwgr5PLsM1XyA==
