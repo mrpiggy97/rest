@@ -10,7 +10,7 @@ import (
 )
 
 func testHandleWebSocket(testCase *testing.T) {
-	go server.Runserver()
+	go server.Runserver(server.GetTestingConfig())
 	time.Sleep(time.Second * 2)
 	var url string = "ws://localhost:5050/ws"
 	_, _, socketErr := websocket.DefaultDialer.Dial(url, nil)
