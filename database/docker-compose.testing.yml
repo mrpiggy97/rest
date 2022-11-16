@@ -1,0 +1,16 @@
+version: '3.0'
+services:
+  testingdb:
+    image: "fabianjesusrivas/restdb:v1.0.0"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=testing_user
+      - POSTGRES_PASSWORD=testing_password
+      - POSTGRES_DB=restdb_testing
+    networks:
+      - rest-network
+
+networks:
+  rest-network:
+    external: true
