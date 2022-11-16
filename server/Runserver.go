@@ -11,8 +11,8 @@ import (
 	"github.com/rs/cors"
 )
 
-func Runserver() {
-	appServer, err := NewServer(context.Background())
+func Runserver(config *Config) {
+	appServer, err := NewServer(context.Background(), config)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
