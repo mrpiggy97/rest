@@ -33,3 +33,11 @@ func NewConfig() *Config {
 func GetConfig() *Config {
 	return NewConfig()
 }
+
+func GetTestingConfig() *Config {
+	return &Config{
+		Port:        os.Getenv("PORT"),
+		JWTSecret:   os.Getenv("TESTING_JWT_SECRET"),
+		DatabaseUrl: os.Getenv("TESTING_DATABASE_URL"),
+	}
+}
