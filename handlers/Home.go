@@ -30,4 +30,5 @@ func HomeHandler(writer http.ResponseWriter, req *http.Request) {
 		UserAuthenticated: isAuthenticated,
 		User:              user,
 	})
+	writer.WriteHeader(http.StatusOK)
 }
