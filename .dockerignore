@@ -1,0 +1,6 @@
+.gitignore
+Dockerfile
+docker-compose.yml
+/database/docker-compose.testing.yml
+/database/Dockerfile
+/database/Up.sql
