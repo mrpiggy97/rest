@@ -40,10 +40,10 @@ func (server *Server) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func NewServer(cxt context.Context) (*Server, error) {
+func NewServer(cxt context.Context, config *Config) (*Server, error) {
 	var allowedOrigins []string = GetAllowedCrossSiteOrigin()
 	var server *Server = &Server{
-		Config:          GetConfig(),
+		Config:          config,
 		MiddlewareFuncs: GetMiddlewareFuncs(),
 		Router:          GetRouter(),
 		Hub:             GetHub(),
