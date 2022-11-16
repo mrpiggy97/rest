@@ -78,8 +78,10 @@ func SignUpHandler(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 	writer.Header().Add("Content-type", "application/json")
-	json.NewEncoder(writer).Encode(SignUpResponse{
+	var response *SignUpResponse = &SignUpResponse{
 		Token:          signedToken,
 		ExpirationDate: expirationDate,
-	})
+	}
+	writer.WriteHeader(http.StatusCreated)
+	json.NewEncoder(writer).Encode(response)
 }
