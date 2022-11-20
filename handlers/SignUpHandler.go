@@ -22,6 +22,7 @@ type SignUpRequest struct {
 type SignUpResponse struct {
 	Token          string `json:"token"`
 	ExpirationDate *jwt.NumericDate
+	Email          string `json:"email"`
 }
 
 func SignUpHandler(writer http.ResponseWriter, req *http.Request) {
@@ -81,6 +82,7 @@ func SignUpHandler(writer http.ResponseWriter, req *http.Request) {
 	var response *SignUpResponse = &SignUpResponse{
 		Token:          signedToken,
 		ExpirationDate: expirationDate,
+		Email:          user.Email,
 	}
 	writer.WriteHeader(http.StatusCreated)
 	json.NewEncoder(writer).Encode(response)
