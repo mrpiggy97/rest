@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -11,9 +12,10 @@ import (
 
 func testHome(testCase *testing.T) {
 	var config *server.Config = server.GetTestingConfig()
+	var address string = fmt.Sprintf("http://localhost:%v/", config.Port)
 	go server.Runserver(config)
 	time.Sleep(time.Millisecond * 1500)
-	req, _ := http.NewRequest("GET", "http://localhost:5000/", nil)
+	req, _ := http.NewRequest("GET", address, nil)
 	var client *http.Client = &http.Client{}
 	response, responseError := client.Do(req)
 	if responseError != nil {
