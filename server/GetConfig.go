@@ -36,7 +36,7 @@ func GetConfig() *Config {
 
 func GetTestingConfig() *Config {
 	return &Config{
-		Port:        os.Getenv("PORT"),
+		Port:        os.Getenv("TESTING_PORT"),
 		JWTSecret:   os.Getenv("TESTING_JWT_SECRET"),
 		DatabaseUrl: os.Getenv("TESTING_DATABASE_URL"),
 	}
