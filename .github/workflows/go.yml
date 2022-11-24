@@ -16,7 +16,7 @@ jobs:
     services:
       database:
         image: fabianjesusrivas/restdb:v1.0.0
-        environment:
+        env:
           - POSTGRES_USER=testing_user
           - POSTGRES_PASSWORD=testing_password
           - POSTGRES_DB=testingdb
