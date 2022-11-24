@@ -36,6 +36,6 @@ jobs:
     - name: Test
       run: cd handlers && go test -v ./...
       env:
-        - TESTING_DATABASE_URL=postgres://testing_user:testing_password@localhost:5432/testingdb?sslmode=disable
-        - PORT=8000
-        - TESTING_JWT_SECRET=T4zcWNdCN8MsWcTVI7u6noSg8a9F8SbS9Pu3pnnv/GcXDi5UwC/Pdnm3eYeoeVQEGWBXVjlWgaMHroTIoO6Rwk4LENknD8nL3vtlT/ewjRQC4AK8SJ0NVBXjQOZ0SyG0n3Cgd79/d3QABC/UQhssgRD8652wHPvKBWKufIwy6pqvIGK9eCpWv0SFkWXb7NmA0408XCzVpcspqqOnjCBzOLIJrHrEEY70JYqcOP0DPEkkEf0pkCBBgtY9E9lJgnwGGtDi6YVn3dYD0PpKiWwf2gMCu0aj1+7/B9ESY9zIr3Jum/cSQs2sq3kwUke8w9kNotiDdnNvj0GsRJ087nyVPQ==
+        TESTING_DATABASE_URL: postgres://testing_user:testing_password@localhost:5432/testingdb?sslmode=disable
+        PORT: 8000
+        TESTING_JWT_SECRET: T4zcWNdCN8MsWcTVI7u6noSg8a9F8SbS9Pu3pnnv/GcXDi5UwC/Pdnm3eYeoeVQEGWBXVjlWgaMHroTIoO6Rwk4LENknD8nL3vtlT/ewjRQC4AK8SJ0NVBXjQOZ0SyG0n3Cgd79/d3QABC/UQhssgRD8652wHPvKBWKufIwy6pqvIGK9eCpWv0SFkWXb7NmA0408XCzVpcspqqOnjCBzOLIJrHrEEY70JYqcOP0DPEkkEf0pkCBBgtY9E9lJgnwGGtDi6YVn3dYD0PpKiWwf2gMCu0aj1+7/B9ESY9zIr3Jum/cSQs2sq3kwUke8w9kNotiDdnNvj0GsRJ087nyVPQ==
