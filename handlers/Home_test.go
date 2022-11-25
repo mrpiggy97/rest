@@ -13,7 +13,6 @@ import (
 func testHome(testCase *testing.T) {
 	var config *server.Config = server.GetTestingConfig()
 	var address string = fmt.Sprintf("http://localhost:%v/", config.Port)
-	go server.Runserver(config)
 	time.Sleep(time.Millisecond * 1500)
 	req, _ := http.NewRequest("GET", address, nil)
 	var client *http.Client = &http.Client{}
