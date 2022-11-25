@@ -20,8 +20,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token          string `json:"token"`
-	ExpirationDate *jwt.NumericDate
+	Token          string           `json:"token"`
+	ExpirationDate *jwt.NumericDate `json:"expiration_date"`
 }
 
 func LoginHandler(writer http.ResponseWriter, req *http.Request) {

@@ -20,9 +20,9 @@ type SignUpRequest struct {
 }
 
 type SignUpResponse struct {
-	Token          string `json:"token"`
-	ExpirationDate *jwt.NumericDate
-	Email          string `json:"email"`
+	Token          string           `json:"token"`
+	ExpirationDate *jwt.NumericDate `json:"expiration_date"`
+	Email          string           `json:"email"`
 }
 
 func SignUpHandler(writer http.ResponseWriter, req *http.Request) {
