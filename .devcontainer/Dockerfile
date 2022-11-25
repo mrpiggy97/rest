@@ -6,7 +6,8 @@ FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT}
 
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="none"
-ENV PORT=5000
+ENV TESTING_PORT=5000
+ENV PORT=8000
 ENV TESTING_DATABASE_URL=postgres://testing_user:testing_password@testingdb:5432/restdb_testing?sslmode=disable
 ENV TESTING_JWT_SECRET=T4zcWNdCN8MsWcTVI7u6noSg8a9F8SbS9Pu3pnnv/GcXDi5UwC/Pdnm3eYeoeVQEGWBXVjlWgaMHroTIoO6Rwk4LENknD8nL3vtlT/ewjRQC4AK8SJ0NVBXjQOZ0SyG0n3Cgd79/d3QABC/UQhssgRD8652wHPvKBWKufIwy6pqvIGK9eCpWv0SFkWXb7NmA0408XCzVpcspqqOnjCBzOLIJrHrEEY70JYqcOP0DPEkkEf0pkCBBgtY9E9lJgnwGGtDi6YVn3dYD0PpKiWwf2gMCu0aj1+7/B9ESY9zIr3Jum/cSQs2sq3kwUke8w9kNotiDdnNvj0GsRJ087nyVPQ==
 RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
